@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 const express = require('express')
@@ -12,6 +14,10 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(fileUpload());
 
+let dir = './public/files'
+let filesAndFolders = [];
+let filesAndFoldersOBJ = {};
+
 // static files
 app.use(express.static('./public'));
 
@@ -23,9 +29,15 @@ app.listen(PORT, () => {
   console.log('Listening on port:', PORT, 'use CTRL+C to close.')
 })
 
+// Admin console commands
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
 rl.on('line', (input) => {
   if (input === 'print list') {
-    console.log(musicList);
+    console.log(filesAndFoldersOBJ);
   } else if (input === 'scan folder') {
     scanFolder()
   } else {
@@ -75,8 +87,8 @@ function scanFolder() {
       }
       processed.push(processing.join('+'));
     }
-    musicList = processed
-    saveToJSON(musicList);
+    filesAndFolders = processed
+    saveToJSON(filesAndFolders);
   });
 }
 
@@ -95,7 +107,7 @@ function saveToJSON(fileList) {
     toObject.push(file);
   }
 
-  musicOBJ = JSON.stringify(toObject)
+  filesAndFoldersOBJ = JSON.stringify(toObject)
   fs.writeFile("./public/master-list.json", JSON.stringify(toObject), 'utf8', function (err) {
     if (err) {
       return console.log(err);
